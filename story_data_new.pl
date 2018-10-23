@@ -56,7 +56,7 @@ cbus(laundromat, library, 9.0, 22.0, 0.25).
 %   Walking is always free and can be done at any time
 %
 walk(elf, park, 0.25).
-walk(library, womens_shelter, 0.5).
+walk(library, mens_shelter, 0.5).
 
 connected_to(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
 connected_to(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
