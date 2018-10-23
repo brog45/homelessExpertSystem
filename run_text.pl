@@ -4,13 +4,10 @@
 :- use_module(story_generator).
 
 go :-
-    Name = 'Brian',
-    Pet = 'Murray',
-    Animal = 'cat',
-    init(Name, Pet, Animal, State),
-    % ConfigDict = config{ name: 'Brian', pet: 'Murray', animal: 'cat' },
-    % init(ConfigDict, State),
-    generate_story(State, [], Story),
+    ConfigDict = config{ name: 'Brian', pet: 'Murray', animal: 'cat' },
+    init(ConfigDict, State),
+    BlockedActions = [],
+    generate_story(State, BlockedActions, Story),
     writeln(Story),
     phrase(story(Story), StoryCodes),
     !,

@@ -1,9 +1,10 @@
 % story data
 
-:- module(story_data,[init/4, action/2, event/4]).
+:- module(story_data,[init/2, action/2, event/4]).
 
-%! init(+Name:atom, +Pet:atom, +Animal:atom, -State:story_state)
-init(Name, Pet, Animal, State) :-
+%! init(+ConfigDict:config_dict, -State:story_state)
+init(ConfigDict, State) :-
+    config{name:Name, pet:Pet, animal:Animal} :< ConfigDict,
     State = [ player_in(bedroom)
             , player(Name)
             , pet(Pet, Animal)
