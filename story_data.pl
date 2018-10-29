@@ -1,6 +1,6 @@
  % story data
 
-:- module(story_data,[init/2, action/2, event/4]).
+:- module(story_data,[init/2, action/2]).
 
 %! init(+Config:dict, -State:story_state)
 %
@@ -62,10 +62,6 @@ connected_to(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
 connected_to(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
 connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(A, B, Dur).
 connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(B, A, Dur).
-
-% I think grouping each action with its corresponding
-% events makes this easier to read.
-:- discontiguous action/2, event/4.
 
 % move from place to place
 action(move(CurrentLocation, Location), action{
