@@ -1,125 +1,81 @@
-% story data
+ % story data
 
 :- module(story_data,[init/2, action/2, event/4]).
 
-%! init(+ConfigDict:config_dict, -State:story_state)
-init(ConfigDict, State) :-
-    config{name:Name, pet:Pet, animal:Animal} :< ConfigDict,
-    State = [ player_in(bedroom)
-            , player(Name)
-            , pet(Pet, Animal)
-            , stomach(empty)
-            , bladder(full)
-            , hands(clean)
-            , dressed_for(bed)
-            , object_in(keys, bedroom)
-            , object_in(comb, bathroom)
-            % , goal(player_in(car))
-            , goal(player_in(kitchen))
-            , goal(stomach(full))
-            , goal(bladder(empty))
-            , goal(holding(keys))
-            , goal(dressed_for(work))
+%! init(+Config:dict, -State:story_state)
+%
+%   Given some initial information about the user
+%   (in a dict) we create the initial state for the planner
+%
+init(_, State) :-
+    State = [
+        % things we automatically gather
+        time(8.0),
+        weather(cold),
+
+        % data from wherever
+        player_in(mens_shelter),
+        have(tent),
+        have(sleeping_bag),
+        funds(4.50),
+        hungry,  % we have not_hungry, hungry and very_hungry
+
+        % goals
+/*        goal(time(24.0)),
+        goal(sleep_at_night),
+        always(not(cold)),
+        always(not(bored)),
+        goal(do_laundry),
+        goal(morning_meal),
+        goal(evening_meal)   */
+        goal(visited(elf)),
+        goal(visited(laundromat))
             ].
 
-% door(yard, car).
-% door(den, yard).
-door(den, kitchen).
-door(hall, den).
-door(bedroom, hall).
-door(bedroom, bathroom).
-door(bathroom, closet).
+% ! bus(-Dir:atom, -From:atom, -To:atom, -Start:time, -End:time,
+%!      -Cost:float, Duration:hours) is nondet
+%
+%   bus lines
+%
+%   Dir is one of bidi (both directgions) or one (one way)
+%
+bus(one, splort, mens_shelter, 16.50, 17.50, 0.0, 0.25).
+bus(one, mens_shelter, splort, 08.0, 08.5, 0.0, 0.25).
+bus(bidi, From, To, Start, End, 1.0, Dur) :-
+    cbus(From, To, Start, End, Dur).
 
-connected_to(A,B) :- door(A,B).
-connected_to(A,B) :- door(B,A).
+%!  cbus(-From:atom, -To:atom, -Start:time, -End:time,
+%!       -Dur:hours) is nondet
+%
+cbus(splort, library, 07.0, 22.0, 0.5).
+cbus(park, library, 9.0, 17.0, 0.5).
+cbus(laundromat, library, 9.0, 22.0, 0.25).
 
-% I think grouping each action with its corresponding 
+%!  walk(-From:atom, -To:atom, -Dur:hours) is nondet
+%
+%   Walking is always free and can be done at any time
+%
+walk(elf, park, 0.25).
+walk(library, mens_shelter, 0.5).
+
+connected_to(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
+connected_to(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
+connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(A, B, Dur).
+connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(B, A, Dur).
+
+% I think grouping each action with its corresponding
 % events makes this easier to read.
 :- discontiguous action/2, event/4.
 
-% pee
-action(pee, action{
-        prereqs: [player_in(bathroom), bladder(full)],
-        negprereqs: [holding(_)],
-        removes: [hands(_), bladder(full)],
-        adds: [hands(dirty), bladder(empty)]
-    }).
-
-% wash hands in the bathroom
-action(wash_hands(bathroom), action{
-        prereqs: [player_in(bathroom), hands(dirty)],
-        negprereqs: [holding(_)],
-        removes: [hands(dirty)],
-        adds: [hands(clean)]
-    }).
-
-% dress for work
-action(dress(work), action{
-        prereqs: [player_in(closet)],
-        negprereqs: [holding(_)],
-        removes: [dressed_for(bed)],
-        adds: [dressed_for(work)]
-    }).
-
-% wash hands in the kitchen
-action(wash_hands(kitchen), action{
-        prereqs: [player_in(kitchen), hands(dirty)],
-        negprereqs: [holding(_)],
-        removes: [hands(dirty)],
-        adds: [hands(clean)]
-    }).
-
-% eat
-action(eat, action{
-        prereqs: [player_in(kitchen), hands(clean), stomach(empty)],
-        negprereqs: [holding(_)],
-        removes: [stomach(empty)],
-        adds: [stomach(full)]
-    }).
-
-event(eat, 0.5, spill, action{
-        prereqs: [],
-        negprereqs: [],
-        removes: [dressed_for(work)],
-        adds: []
-    }).
-
-% grab object
-action(grab(Object), action{
-        prereqs: [player_in(Location), object_in(Object, Location)],
-        negprereqs: [holding(_)],
-        removes: [object_in(Object, Location)],
-        adds: [holding(Object)]
-    }).
-
-% move from room to room
+% move from place to place
 action(move(CurrentLocation, Location), action{
         prereqs: [player_in(CurrentLocation)],
-        negprereqs: [needy_pet],
-        removes: [player_in(CurrentLocation)],
-        adds: [player_in(Location)]
+        negprereqs: [],
+        removes: [player_in(CurrentLocation), visited(Location)],
+        adds: [player_in(Location), visited(Location)],
+        duration: Duration,
+        cost: Cost,
+        openTime: StartTime,
+        closeTime: EndTime
     }) :-
-    connected_to(CurrentLocation, Location).
-
-event(move(_, _), 0.1, needy_pet(Name, Animal), action{
-        prereqs: [pet(Name, Animal)],
-        negprereqs: [],
-        removes: [],
-        adds: [needy_pet]
-    }).
-
-% drop object
-action(drop(Object), action{
-        prereqs: [player_in(Location), holding(Object)],
-        negprereqs: [],
-        removes: [holding(Object)],
-        adds: [object_in(Object, Location)]
-    }).
-
-% love pet
-action(love_pet(Name,Animal), action{
-        prereqs: [needy_pet, pet(Name, Animal)],
-        negprereqs: [],
-        removes: [needy_pet, hands(clean)],
-        adds: [hands(dirty)]
-    }).
+    connected_to(CurrentLocation, Location, StartTime, EndTime, Cost, Duration).

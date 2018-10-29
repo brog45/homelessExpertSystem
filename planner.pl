@@ -37,20 +37,54 @@ done(State) :-
 
 % take an action; check its outcome against the closed list; and add its action term to the plan
 take_action(NodeIn, BlockedActions, ClosedSet, NodeOut) :-
+    % only proceed if the current node's state and plan are both viable
+    state_plan_node(StateIn, PlanIn, NodeIn),
+    viable_state(StateIn),
+    viable_plan(PlanIn),
     % action/1 is defined in the story data
     action(ActionStep, ActionDict),
     \+ memberchk(ActionStep, BlockedActions),
-    state_plan_node(StateIn, PlanIn, NodeIn),
     apply_action(StateIn, ActionDict, StateOut),
     state_not_closed(StateOut, ClosedSet),
     append(PlanIn, [ActionStep], PlanOut),
     state_plan_node(StateOut, PlanOut, NodeOut).
 
+viable_state(State) :-
+    memberchk(funds(Funds), State), 
+    Funds >= 0,
+    memberchk(time(Time), State), 
+    Time =< 24.
+
+viable_plan(Plan) :-
+    length(Plan, Length),
+    Length < 20.
+
 apply_action(StateIn, ActionDict, StateOut) :-
     subtract(StateIn, ActionDict.negprereqs, StateIn),
     intersection(ActionDict.prereqs, StateIn, ActionDict.prereqs),
     subtract(StateIn, ActionDict.removes, S0),
-    append(S0, ActionDict.adds, StateOut).
+    append(S0, ActionDict.adds, S1),
+    apply_action_cost(S1, ActionDict, S2),
+    apply_action_duration(S2, ActionDict, StateOut).
+
+apply_action_cost(StateIn, ActionDict, StateOut) :-
+    action{ cost: Cost } :< ActionDict,
+    memberchk(funds(Funds), StateIn),
+    !,
+    Cost =< Funds,
+    RemainingFunds is Funds - Cost,
+    select(funds(Funds), StateIn, funds(RemainingFunds), StateOut).
+apply_action_cost(_,_,_).
+
+apply_action_duration(StateIn, ActionDict, StateOut) :-
+    action{ duration: Duration, openTime: OpenTime, closeTime: CloseTime } :< ActionDict,
+    memberchk(time(TimeIn), StateIn),
+    !,
+    TimeIn >= OpenTime, 
+    TimeOut is TimeIn + Duration,
+    TimeOut =< CloseTime,
+    select(time(TimeIn), StateIn, time(TimeOut), StateOut).
+apply_action_duration(_,_,_).
 
 state_not_closed(State, ClosedSet) :-
     list_to_ord_set(State, StateOrdSet),
