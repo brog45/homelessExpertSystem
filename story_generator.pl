@@ -12,16 +12,18 @@ apply_plan(State, Plan, BlockedActions, _Story) :-
     debug(story_generator(apply_plan, plan), 'Plan: ~w', [Plan]),
     debug(story_generator(apply_plan, blocked_actions), 'Blocked Actions: ~w', [BlockedActions]),
     fail.
-apply_plan(_, [], _, []).
+apply_plan(State, [], _, [time(EndTime)]) :-
+    memberchk(time(EndTime), State).
 apply_plan(State, [Action|_], BlockedActions, TailOut) :-
     reject_action(Action),
     !,
     calculate_plan(State, [Action|BlockedActions], NewPlan),
     apply_plan(State, NewPlan, [Action|BlockedActions], TailOut).
-apply_plan(State, [Action|T], BlockedActions, [Action|TailOut]) :-
+apply_plan(State, [Action|T], BlockedActions, [time(StartTime),Action|TailOut]) :-
     action(Action, ActionDict), 
     apply_action(State, ActionDict, NewState),
-    apply_plan(NewState, T, BlockedActions, TailOut).
+    apply_plan(NewState, T, BlockedActions, TailOut), 
+    memberchk(time(StartTime), State).
 
 % reject_action(wash_hands(bathroom)).
 % reject_action(_) :- !, fail.
