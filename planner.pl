@@ -80,9 +80,15 @@ apply_action_duration(StateIn, ActionDict, StateOut) :-
     action{ duration: Duration, openTime: OpenTime, closeTime: CloseTime } :< ActionDict,
     memberchk(time(TimeIn), StateIn),
     !,
-    TimeIn >= OpenTime, 
     TimeOut is TimeIn + Duration,
-    TimeOut =< CloseTime,
+    (   action{ openTime: OpenTime } :< ActionDict
+    ->  TimeIn >= OpenTime
+    ;   true
+    ),
+    (   action{ closeTime: CloseTime } :< ActionDict
+    ->  TimeOut =< CloseTime
+    ;   true
+    ),
     select(time(TimeIn), StateIn, time(TimeOut), StateOut).
 apply_action_duration(_,_,_).
 
