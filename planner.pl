@@ -74,10 +74,10 @@ apply_action_cost(StateIn, ActionDict, StateOut) :-
     Cost =< Funds,
     RemainingFunds is Funds - Cost,
     select(funds(Funds), StateIn, funds(RemainingFunds), StateOut).
-apply_action_cost(_,_,_).
+apply_action_cost(State,_,State).
 
 apply_action_duration(StateIn, ActionDict, StateOut) :-
-    action{ duration: Duration, openTime: OpenTime, closeTime: CloseTime } :< ActionDict,
+    action{ duration: Duration } :< ActionDict,
     memberchk(time(TimeIn), StateIn),
     !,
     TimeOut is TimeIn + Duration,
@@ -90,7 +90,7 @@ apply_action_duration(StateIn, ActionDict, StateOut) :-
     ;   true
     ),
     select(time(TimeIn), StateIn, time(TimeOut), StateOut).
-apply_action_duration(_,_,_).
+apply_action_duration(State,_,State).
 
 state_not_closed(State, ClosedSet) :-
     list_to_ord_set(State, StateOrdSet),
