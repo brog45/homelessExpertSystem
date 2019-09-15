@@ -1,4 +1,4 @@
-:- module(executor,[generate_story/3]).
+:- module(story_generator,[generate_story/3]).
 :- use_module(story_data).
 :- use_module(planner).
 
