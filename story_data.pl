@@ -58,10 +58,13 @@ cbus(laundromat, library, 9.0, 22.0, 0.25).
 walk(elf, park, 0.25).
 walk(library, mens_shelter, 0.5).
 
-connected_to(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
-connected_to(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
-connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(A, B, Dur).
-connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(B, A, Dur).
+walkable(A, B, Duration) :- walk(A, B, Duration).
+walkable(A, B, Duration) :- walk(B, A, Duration).
+
+busable(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
+busable(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
+busable(A, B, 0.0, 24.0, 0.0, Dur) :- walk(A, B, Dur).
+busable(A, B, 0.0, 24.0, 0.0, Dur) :- walk(B, A, Dur).
 
 % wait
 action(wait(Duration), action{
@@ -73,8 +76,18 @@ action(wait(Duration), action{
     }) :-
     member(Duration, [0.5, 1.0]).
 
-% move from place to place
-action(move(CurrentLocation, Location), action{
+% walk
+action(walk(CurrentLocation, Location), action{
+        prereqs: [player_in(CurrentLocation)],
+        negprereqs: [],
+        removes: [player_in(CurrentLocation), visited(Location)],
+        adds: [player_in(Location), visited(Location)],
+        duration: Duration
+    }) :-
+    walkable(CurrentLocation, Location, Duration).
+
+% take the bus
+action(bus_to(CurrentLocation, Location), action{
         prereqs: [player_in(CurrentLocation)],
         negprereqs: [],
         removes: [player_in(CurrentLocation), visited(Location)],
@@ -84,4 +97,4 @@ action(move(CurrentLocation, Location), action{
         openTime: StartTime,
         closeTime: EndTime
     }) :-
-    connected_to(CurrentLocation, Location, StartTime, EndTime, Cost, Duration).
+    busable(CurrentLocation, Location, StartTime, EndTime, Cost, Duration).
