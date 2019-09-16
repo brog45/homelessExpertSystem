@@ -10,27 +10,27 @@
 init(_, State) :-
     State = [
         % things we automatically gather
-        time(8.0),
-        weather(cold),
+          time(8.0)
+        , weather(cold)
 
         % data from wherever
-        player_in(mens_shelter),
-        have(tent),
-        have(sleeping_bag),
-        funds(4.50),
-        hungry,  % we have not_hungry, hungry and very_hungry
+        , player_in(mens_shelter)
+        , have(tent)
+        , have(sleeping_bag)
+        , funds(4.50)
+        , hungry  % we have not_hungry, hungry and very_hungry
 
         % goals
-/*        goal(time(24.0)),
-        goal(sleep_at_night),
-        always(not(cold)),
-        always(not(bored)),
-        goal(do_laundry),
-        goal(morning_meal),
-        goal(evening_meal)   */
-        goal(visited(elf)),
-        goal(visited(laundromat))
-            ].
+        %, goal(time(24.0)),
+        %, goal(sleep_at_night),
+        %, always(not(cold)),
+        %, always(not(bored)),
+        %, goal(do_laundry),
+        %, goal(morning_meal),
+        %, goal(evening_meal)
+        , goal(visited(elf))
+        , goal(visited(laundromat))
+    ].
 
 % ! bus(-Dir:atom, -From:atom, -To:atom, -Start:time, -End:time,
 %!      -Cost:float, Duration:hours) is nondet
