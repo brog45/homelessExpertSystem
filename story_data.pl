@@ -66,8 +66,6 @@ walkable(A, B, Duration) :-
 
 busable(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
 busable(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
-busable(A, B, 0.0, 24.0, 0.0, Dur) :- walk(A, B, Dur).
-busable(A, B, 0.0, 24.0, 0.0, Dur) :- walk(B, A, Dur).
 
 % wait
 action(wait(Duration), action{
