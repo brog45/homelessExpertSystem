@@ -16,3 +16,4 @@ step(Step) -->
 
 step_(move(A,B)) --> ['Walk from the '], atom(A), [' to the '], atom(B), ['.'].
 step_(time(T)) --> ['The time is now '], time(T), ['.'].
+step_(wait(Duration)) --> ['Wait for '], atom(Duration), " hours.".

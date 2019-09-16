@@ -63,6 +63,16 @@ connected_to(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
 connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(A, B, Dur).
 connected_to(A, B, 0.0, 24.0, 0.0, Dur) :- walk(B, A, Dur).
 
+% wait
+action(wait(Duration), action{
+        prereqs: [],
+        negprereqs: [],
+        removes: [],
+        adds: [],
+        duration: Duration
+    }) :-
+    member(Duration, [0.5, 1.0]).
+
 % move from place to place
 action(move(CurrentLocation, Location), action{
         prereqs: [player_in(CurrentLocation)],
