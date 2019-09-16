@@ -30,6 +30,7 @@ init(_, State) :-
         %, goal(evening_meal)
         , goal(visited(elf))
         , goal(visited(laundromat))
+        %, goal(player_in(mens_shelter))
     ].
 
 % ! bus(-Dir:atom, -From:atom, -To:atom, -Start:time, -End:time,
