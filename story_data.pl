@@ -30,7 +30,7 @@ init(_, State) :-
         %, goal(evening_meal)
         , goal(visited(elf))
         , goal(visited(laundromat))
-        %, goal(player_in(mens_shelter))
+        , goal(player_in(mens_shelter))
     ].
 
 % ! bus(-Dir:atom, -From:atom, -To:atom, -Start:time, -End:time,
@@ -67,16 +67,6 @@ walkable(A, B, Duration) :-
 
 busable(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
 busable(A, B, S, E, Cost, Dur) :- bus(bidi, B, A, S, E, Cost, Dur).
-
-% wait
-action(wait(Duration), action{
-        prereqs: [],
-        negprereqs: [],
-        removes: [],
-        adds: [],
-        duration: Duration
-    }) :-
-    member(Duration, [0.5, 1.0]).
 
 % walk
 action(walk(CurrentLocation, Location), action{
