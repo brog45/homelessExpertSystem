@@ -7,7 +7,7 @@ go :-
     ConfigDict = config{ name: 'Brian', pet: 'Murray', animal: 'cat' },
     init(ConfigDict, State),
     BlockedActions = [],
-    calculate_plan(State, BlockedActions, Story),
+    generate_story(State, BlockedActions, Story),
     writeln(Story),
     phrase(story(Story), StoryCodes),
     !,
