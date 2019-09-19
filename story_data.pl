@@ -62,7 +62,8 @@ walk(library, mens_shelter, 0.5).
 walkable(A, B, Duration) :- walk(A, B, Duration).
 walkable(A, B, Duration) :- walk(B, A, Duration).
 walkable(A, B, Duration) :- 
-    busable(A, B, _, _, _, BusDuration),
+    busable(A, B, _, _, Cost, BusDuration),
+    Cost > 0,
     Duration is 2.5 * BusDuration.
 
 busable(A, B, S, E, Cost, Dur) :- bus(_, A, B, S, E, Cost, Dur).
