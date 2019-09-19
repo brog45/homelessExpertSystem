@@ -19,11 +19,12 @@ apply_plan(State, [Action|_], BlockedActions, TailOut) :-
     !,
     calculate_plan(State, [Action|BlockedActions], NewPlan),
     apply_plan(State, NewPlan, [Action|BlockedActions], TailOut).
-apply_plan(State, [Action|T], BlockedActions, [time(StartTime),Action|TailOut]) :-
+apply_plan(State, [Action|T], BlockedActions, [time(StartTime),funds(Funds),Action|TailOut]) :-
     action(Action, ActionDict), 
-    apply_action(State, ActionDict, NewState),
-    apply_plan(NewState, T, BlockedActions, TailOut), 
-    memberchk(time(StartTime), State).
+    apply_action(State, ActionDict, NewState), 
+    memberchk(time(StartTime), State),
+    memberchk(funds(Funds), State),
+    apply_plan(NewState, T, BlockedActions, TailOut).
 
 % reject_action(wash_hands(bathroom)).
 % reject_action(_) :- !, fail.
